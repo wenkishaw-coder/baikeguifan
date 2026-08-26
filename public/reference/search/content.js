@@ -4,7 +4,7 @@
   const keyword = new URLSearchParams(location.search).get("wd") || "";
   if (location.protocol !== "file:" && !keyword.includes("教师节")) return;
 
-  const VERSION = "planes-826-66";
+  const VERSION = "planes-826-67";
   const assetUrl = (path) => new URL(`plane-assets/${path}?v=${VERSION}`, document.baseURI || location.href).href;
   const guideButtonUrl = new URL(`guide-button.png?v=${VERSION}`, document.baseURI || location.href).href;
   const guideLightUrl = new URL(`guide-light.png?v=${VERSION}`, document.baseURI || location.href).href;
@@ -457,6 +457,7 @@
     if (flight.entryTimer) clearTimeout(flight.entryTimer);
     if (flight.cleanupTimer) clearTimeout(flight.cleanupTimer);
     if (flight.fadeTimer) clearTimeout(flight.fadeTimer);
+    if (flight.handoffTimer) clearTimeout(flight.handoffTimer);
     flight.video?.pause();
     [flight.plane, flight.hit, flight.reveal, flight.effect, flight.copyWrap, flight.video].forEach((element) => element?.remove());
   };
@@ -496,7 +497,6 @@
     flight.state = "opening";
     if (flight.raf) cancelAnimationFrame(flight.raf);
     flight.hit.style.pointerEvents = "none";
-    flight.plane.style.opacity = "0";
 
     const reveal = document.createElement("div");
     reveal.className = "teacher-day-plane-reveal";
@@ -582,6 +582,13 @@
         reveal.classList.add("is-visible");
         effect.classList.add("is-visible");
         copy.classList.add("is-opening");
+        // Keep the clicked plane visible through the reveal fade-in. Hiding it
+        // before the decoded first frame is ready leaves a transparent gap on
+        // slower connections; hand off only after the reveal is fully visible.
+        flight.handoffTimer = setTimeout(() => {
+          flight.handoffTimer = 0;
+          if (flight.state === "opening") flight.plane.style.opacity = "0";
+        }, 190);
         video.play().catch(() => {});
         const draw = () => {
           if (flight.state !== "opening") return;
