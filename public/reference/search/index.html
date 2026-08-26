@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>百度教师节彩蛋预览</title>
+    <link rel="preload" as="image" fetchpriority="high" href="saved-page/教师节_百度搜索_files/teacher-day-logo-custom.png?v=logo-824-1">
+    <link rel="stylesheet" href="styles.css?v=planes-826-66">
+  <style>
+    html,body{margin:0;width:100%;min-height:100%;background:#fff url("result-page-background.png?v=background-826-3") center top / cover no-repeat}
+    body{overflow:hidden}
+    .page-frame{position:fixed;inset:0;width:100%;height:100%;border:0;background:#fff;visibility:hidden;opacity:0;pointer-events:none}
+    .page-frame.is-ready{visibility:visible}
+    .result-home-hit{position:fixed;left:0;top:0;z-index:2147483647;width:clamp(240px,21vw,820px);height:clamp(70px,7vw,120px);padding:0;border:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent}
+    .result-home-hit:focus-visible{outline:3px solid rgba(49,94,251,.55);outline-offset:3px;border-radius:8px}
+    body:not(.search-page-ready) #teacher-day-plane-entry,
+    body:not(.search-page-ready) #teacher-day-plane-button,
+    body:not(.search-page-ready) #teacher-day-plane-flights{visibility:hidden!important;opacity:0!important;pointer-events:none!important}
+  </style>
+</head>
+<body>
+  <iframe
+    class="page-frame"
+    src="saved-page/%E6%95%99%E5%B8%88%E8%8A%82_%E7%99%BE%E5%BA%A6%E6%90%9C%E7%B4%A2.html"
+    title="百度教师节搜索页"
+    loading="eager"></iframe>
+  <button class="result-home-hit" type="button" aria-label="返回首页" title="返回首页"></button>
+  <script>
+    const pageFrame = document.querySelector(".page-frame");
+    const homeHit = document.querySelector(".result-home-hit");
+    homeHit.addEventListener("click", () => {
+      window.location.href = new URL("../../", location.href).href;
+    });
+    const logoUrl = new URL(
+      "saved-page/教师节_百度搜索_files/teacher-day-logo-custom.png?v=logo-824-1",
+      location.href
+    ).href;
+    const waitForImage = (image) => {
+      if (image.complete && image.naturalWidth > 0) {
+        return typeof image.decode === "function" ? image.decode().catch(() => {}) : Promise.resolve();
+      }
+      return new Promise((resolve) => {
+        image.addEventListener("load", resolve, { once: true });
+        image.addEventListener("error", resolve, { once: true });
+      });
+    };
+    const latestLogoReady = new Promise((resolve) => {
+      const image = new Image();
+      image.decoding = "async";
+      image.addEventListener("load", async () => {
+        await waitForImage(image);
+        resolve(image.naturalWidth > 0);
+      }, { once: true });
+      image.addEventListener("error", () => resolve(false), { once: true });
+      image.src = logoUrl;
+    });
+    let logoReplacementStarted = false;
+    let logoRetryTimer = 0;
+    const revealSearchPage = () => {
+      if (pageFrame.classList.contains("is-ready")) return;
+      pageFrame.classList.add("is-ready");
+      document.body.classList.add("search-page-ready");
+      document.dispatchEvent(new Event("search-page-ready"));
+    };
+    const replaceSearchLogo = async () => {
+      if (logoReplacementStarted) return;
+      const frameDocument = pageFrame.contentDocument;
+      if (!frameDocument) return;
+      const logoImages = [...frameDocument.querySelectorAll("#result_logo img")];
+      if (!logoImages.length) {
+        // The iframe can emit an initial about:blank load before its saved
+        // search document is parsed. Wait for the real logo nodes instead of
+        // revealing the old fallback document.
+        if (!logoRetryTimer) {
+          logoRetryTimer = setTimeout(() => {
+            logoRetryTimer = 0;
+            replaceSearchLogo();
+          }, 40);
+        }
+        return;
+      }
+      logoReplacementStarted = true;
+      // Hide the old logo before revealing the iframe. This removes the
+      // fallback flash without blocking the rest of the search page.
+      logoImages.forEach(image => {
+        image.style.visibility = "hidden";
+        image.removeAttribute("srcset");
+        image.setAttribute("decoding", "sync");
+      });
+      revealSearchPage();
+      if (!await latestLogoReady) return;
+      logoImages.forEach(image => {
+        image.src = logoUrl;
+      });
+      await Promise.all(logoImages.map(waitForImage));
+      logoImages.forEach(image => {
+        image.style.visibility = "visible";
+      });
+    };
+    pageFrame.addEventListener("load", replaceSearchLogo);
+    if (pageFrame.contentDocument?.readyState === "complete") {
+      replaceSearchLogo();
+    }
+  </script>
+    <script src="content.js?v=planes-826-66"></script>
+</body>
+</html>

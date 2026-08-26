@@ -1,0 +1,362 @@
+#teacher-day-plane-entry,
+#teacher-day-plane-button {
+  position: fixed;
+  inset: 0;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2147483645;
+  overflow: hidden;
+  transition: opacity .28s ease, visibility 0s linear .28s;
+}
+
+#teacher-day-plane-entry.is-visible,
+#teacher-day-plane-button.is-visible {
+  visibility: visible;
+  opacity: 1;
+  transition-delay: 0s;
+}
+
+#teacher-day-plane-entry {
+  z-index: 2147483647;
+}
+
+#teacher-day-plane-button {
+  z-index: 2147483647;
+}
+
+.teacher-day-plane-intro {
+  position: absolute;
+  left: 33.3%;
+  top: 50%;
+  width: min(100vw, 160vh);
+  aspect-ratio: 8 / 5;
+  transform: translate(-56%, -50%) scale(.72);
+  transform-origin: center center;
+  pointer-events: none;
+}
+
+.teacher-day-plane-intro svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.teacher-day-plane-intro svg * {
+  filter: none !important;
+}
+
+.teacher-day-plane-intro-sequence {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: contain;
+  transform-origin: center center;
+  pointer-events: none;
+  user-select: none;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.teacher-day-launch-button {
+  position: absolute;
+  left: 47.3%;
+  bottom: clamp(28px, 5.4vh, 68px);
+  width: clamp(190px, 26vw, 380px);
+  height: clamp(82px, 11vw, 158px);
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  transform: translateX(-50%);
+  cursor: pointer;
+  pointer-events: auto;
+  animation: teacher-day-button-breathe 2.1s ease-in-out infinite;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.teacher-day-launch-button::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(100%, 288px);
+  aspect-ratio: 224 / 93;
+  transform: translate(-50%, -50%);
+  background: url("plane-assets/launch-button.png?v=planes-823-1") center / contain no-repeat;
+}
+
+.teacher-day-plane-idle {
+  position: absolute;
+  left: 77%;
+  top: 42%;
+  width: clamp(108px, 11vw, 154px);
+  aspect-ratio: 1;
+  display: block;
+  object-fit: contain;
+  transform: translate(-50%, -58%) scale(.8);
+  transform-origin: center center;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transition: opacity .12s ease;
+}
+
+.teacher-day-plane-idle.is-visible {
+  opacity: 1;
+}
+
+.teacher-day-launch-button:focus-visible {
+  outline: 3px solid rgba(69, 126, 255, .65);
+  outline-offset: 5px;
+  border-radius: 12px;
+}
+
+#teacher-day-plane-flights {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483648;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.teacher-day-plane-source {
+  position: fixed;
+  left: -9999px;
+  top: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.teacher-day-plane-flight,
+.teacher-day-plane-flight-hit,
+.teacher-day-plane-effect,
+.teacher-day-plane-copy {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: clamp(88px, 12vw, 174px);
+  aspect-ratio: 1;
+  object-fit: contain;
+  transform-origin: center center;
+  user-select: none;
+  pointer-events: none;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.teacher-day-plane-flight {
+  opacity: 0;
+  filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .1));
+  transition: opacity .25s ease;
+}
+
+.teacher-day-plane-flight,
+.teacher-day-plane-flight-hit {
+  width: clamp(100px, 9.3vw, 178px);
+}
+
+.teacher-day-plane-flight.is-visible {
+  opacity: 1;
+}
+
+.teacher-day-plane-flight-hit {
+  z-index: 2;
+  border: 0;
+  padding: 0;
+  outline: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  opacity: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.teacher-day-plane-flight-hit:focus-visible {
+  outline: 3px solid rgba(69, 126, 255, .55);
+  outline-offset: 3px;
+  border-radius: 50%;
+}
+
+.teacher-day-plane-reveal {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: block;
+  pointer-events: none;
+  opacity: 0;
+  overflow: visible;
+  transition: opacity .16s ease;
+  will-change: opacity;
+  backface-visibility: hidden;
+}
+
+.teacher-day-plane-reveal.is-visible {
+  opacity: 1;
+}
+
+.teacher-day-plane-effect {
+  z-index: 3;
+  width: clamp(130px, 18vw, 270px);
+  /* The source is a side-by-side 1800:900 video. The canvas receives the
+     color half, but its display box must retain the source's horizontal ratio. */
+  height: auto;
+  aspect-ratio: 2 / 1;
+  opacity: 1;
+  transition: none;
+}
+
+.teacher-day-plane-effect.is-visible {
+  opacity: 1;
+}
+
+.teacher-day-plane-copy-wrap {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 4;
+  display: block;
+  width: clamp(130px, 14vw, 210px);
+  aspect-ratio: 1;
+  pointer-events: none;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.teacher-day-plane-copy {
+  width: 100%;
+  height: 100%;
+  opacity: 1;
+  pointer-events: none;
+  animation: none;
+  transition: none;
+}
+
+.teacher-day-plane-copy.is-opening {
+  opacity: 1;
+}
+
+@keyframes teacher-day-button-breathe {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.045); }
+}
+
+@media (max-width: 700px) {
+  .teacher-day-plane-intro {
+    left: 27%;
+    width: 150vw;
+    transform: translate(-56%, -50%) scale(.7);
+  }
+
+  .teacher-day-launch-button {
+    bottom: 7vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teacher-day-launch-button {
+    animation: none;
+  }
+}
+
+/* Multi-plane entry and post-click flight states. */
+.teacher-day-plane-guide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 6;
+  display: block;
+  width: clamp(190px, 18vw, 260px);
+  aspect-ratio: 525 / 517;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity .16s ease;
+  user-select: none;
+  overflow: visible;
+}
+
+.teacher-day-plane-guide-light,
+.teacher-day-plane-guide-button {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+.teacher-day-plane-guide-light {
+  left: 50%;
+  top: 9.2%;
+  width: 80%;
+  height: auto;
+  transform: translateX(-50%);
+  transform-origin: center center;
+  animation: teacher-day-plane-guide-light-spin 8s linear infinite;
+  will-change: transform;
+}
+
+.teacher-day-plane-guide-button {
+  top: 56%;
+  width: 100%;
+  height: auto;
+}
+
+.teacher-day-plane-guide.is-visible {
+  opacity: 1;
+}
+
+.teacher-day-plane-guide.is-hidden {
+  opacity: 0;
+}
+
+.teacher-day-plane-flight {
+  width: clamp(100px, 9.3vw, 178px);
+  height: auto;
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+
+.teacher-day-plane-flight.is-yellow {
+  z-index: 7;
+  width: clamp(100px, 9.3vw, 178px);
+}
+
+.teacher-day-plane-flight-hit.is-yellow {
+  z-index: 8;
+  width: clamp(100px, 9.3vw, 178px);
+}
+
+@media (max-width: 700px) {
+  .teacher-day-plane-guide {
+    width: min(72vw, 250px);
+  }
+
+  .teacher-day-plane-flight.is-yellow,
+  .teacher-day-plane-flight-hit.is-yellow {
+    width: clamp(100px, 9.3vw, 178px);
+  }
+}
+
+@keyframes teacher-day-plane-guide-light-spin {
+  from { transform: translateX(-50%) rotate(0deg); }
+  to { transform: translateX(-50%) rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teacher-day-plane-guide-light {
+    animation: none;
+  }
+}
