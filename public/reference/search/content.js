@@ -4,7 +4,7 @@
   const keyword = new URLSearchParams(location.search).get("wd") || "";
   if (location.protocol !== "file:" && !keyword.includes("教师节")) return;
 
-  const VERSION = "planes-826-67";
+  const VERSION = "planes-826-71";
   const assetUrl = (path) => new URL(`plane-assets/${path}?v=${VERSION}`, document.baseURI || location.href).href;
   const guideButtonUrl = new URL(`guide-button.png?v=${VERSION}`, document.baseURI || location.href).href;
   const guideLightUrl = new URL(`guide-light.png?v=${VERSION}`, document.baseURI || location.href).href;
@@ -300,7 +300,9 @@
     const direction = unitVector(headingFromRotation(flight.rotate, flight.flipY, flight.flipX));
     const normal = normalVector(direction);
     const distance = distanceToViewportExit(flight.point, direction, 320);
-    const offsets = [170, -150, 155, -175, 140];
+    // Keep opposing headings on separate sides of the crossing. Each lane is
+    // assigned a stable signed offset so the arcs do not converge in the page.
+    const offsets = [-180, -180, 170, 180, -140];
     const offset = offsets[index % offsets.length];
     const start = { ...flight.point };
     const end = {
@@ -582,14 +584,24 @@
         reveal.classList.add("is-visible");
         effect.classList.add("is-visible");
         copy.classList.add("is-opening");
-        // Keep the clicked plane visible through the reveal fade-in. Hiding it
-        // before the decoded first frame is ready leaves a transparent gap on
-        // slower connections; hand off only after the reveal is fully visible.
-        flight.handoffTimer = setTimeout(() => {
-          flight.handoffTimer = 0;
-          if (flight.state === "opening") flight.plane.style.opacity = "0";
-        }, 190);
         video.play().catch(() => {});
+        // Keep the clicked plane visible until the effect canvas has a real
+        // visible frame. The video can report metadata before its first
+        // decoded frame is painted; hiding the plane on a fixed timer creates
+        // a brief transparent gap on slower devices.
+        const handoffToReveal = () => {
+          if (flight.state !== "opening") return;
+          const revealProgress = Number.isFinite(flight.renderState.revealProgress)
+            ? flight.renderState.revealProgress
+            : 0;
+          if (revealProgress > .015) {
+            flight.handoffTimer = 0;
+            flight.plane.style.opacity = "0";
+            return;
+          }
+          flight.handoffTimer = setTimeout(handoffToReveal, 24);
+        };
+        handoffToReveal();
         const draw = () => {
           if (flight.state !== "opening") return;
           renderEffectFrame(video, effect, flight.renderState);
@@ -869,8 +881,9 @@
     video.className = "teacher-day-plane-source";
     video.muted = true;
     video.playsInline = true;
-    video.preload = "metadata";
+    video.preload = "auto";
     video.src = assetUrl(`planes/${spec.folder}/effect.mp4`);
+    video.load();
     video.setAttribute("aria-hidden", "true");
 
     const flight = {
