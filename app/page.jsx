@@ -54,6 +54,8 @@ const DOODLE_FRAME_DURATION = 1000 / AE_VIDEO_FPS;
 const HOVER_IN_FRAME_DURATION = DOODLE_FRAME_DURATION * (38 / HOVER_IN_FRAME_COUNT);
 const HOVER_OUT_FRAME_DURATION = DOODLE_FRAME_DURATION;
 const HOVER_LOOP_FRAME_DURATION = DOODLE_FRAME_DURATION;
+const HOVER_IN_EAGER_FRAME_COUNT = 10;
+const FRAME_LOAD_BATCH_SIZE = 8;
 const DOODLE_ASSET_VERSION = "doodle-813-6";
 const HOVER_OUT_ASSET_VERSION = "doodle-813-7";
 // The source sequences use the same canvas size, but the bloom-in export is
@@ -75,7 +77,16 @@ function DoodleVideo() {
   const hoveredRef = useRef(false);
   const canvasRef = useRef(null);
   const canvasContextRef = useRef(null);
-  const framesRef = useRef({ hoverIn: [], hoverLoop: [], hoverOut: [] });
+  const framesRef = useRef({
+    hoverIn: Array(HOVER_IN_FRAME_COUNT).fill(null),
+    hoverLoop: Array(HOVER_LOOP_FRAME_COUNT).fill(null),
+    hoverOut: Array(HOVER_OUT_FRAME_COUNT).fill(null),
+  });
+  const frameLoadStateRef = useRef({
+    hoverIn: Array(HOVER_IN_FRAME_COUNT).fill(false),
+    hoverLoop: Array(HOVER_LOOP_FRAME_COUNT).fill(false),
+    hoverOut: Array(HOVER_OUT_FRAME_COUNT).fill(false),
+  });
   const framesReadyRef = useRef(false);
   const animationFrameRef = useRef(null);
   const transitionTimerRef = useRef(null);
@@ -199,12 +210,15 @@ function DoodleVideo() {
       const elapsedFrames = Math.floor((now - startedAt) / frameDuration);
       const nextIndex = loop ? (firstIndex + elapsedFrames) % frames.length : Math.min(lastIndex, firstIndex + elapsedFrames);
 
-      if (nextIndex !== drawnIndex) {
+      if (nextIndex !== drawnIndex && frames[nextIndex]) {
         drawFrame(kind, nextIndex);
         drawnIndex = nextIndex;
       }
 
-      if (loop || nextIndex < lastIndex) {
+      // Keep the timeline alive while a background batch is still decoding.
+      // The current pose remains on canvas until the next frame is available,
+      // so progressive loading never exposes a blank or partial animation.
+      if (loop || nextIndex < lastIndex || !frameLoadStateRef.current[kind][lastIndex]) {
         animationFrameRef.current = window.requestAnimationFrame(tick);
         return;
       }
@@ -226,9 +240,10 @@ function DoodleVideo() {
 
   useEffect(() => {
     let cancelled = false;
-    const loadFrame = (src) => new Promise((resolve, reject) => {
+    const loadFrame = (src, priority = "low") => new Promise((resolve) => {
       const image = new Image();
       image.decoding = "async";
+      if ("fetchPriority" in image) image.fetchPriority = priority;
       image.onload = () => {
         if (typeof image.decode !== "function") {
           resolve(image);
@@ -236,29 +251,46 @@ function DoodleVideo() {
         }
         image.decode().catch(() => {}).finally(() => resolve(image));
       };
-      image.onerror = reject;
+      image.onerror = () => resolve(null);
       image.src = src;
     });
+
+    const sequenceEntries = Object.entries(doodleFrameSources);
+    const assignFrames = (entries, images) => {
+      entries.forEach(([kind, index], entryIndex) => {
+        if (cancelled) return;
+        framesRef.current[kind][index] = images[entryIndex];
+        frameLoadStateRef.current[kind][index] = true;
+      });
+    };
 
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
-    const sequenceEntries = Object.entries(doodleFrameSources);
-    Promise.all(sequenceEntries.flatMap(([, sources]) => sources).map(loadFrame))
-      .then((images) => {
+    const eagerEntries = doodleFrameSources.hoverIn
+      .slice(0, HOVER_IN_EAGER_FRAME_COUNT)
+      .map((_, index) => ["hoverIn", index]);
+    Promise.all(eagerEntries.map(([, index]) => loadFrame(doodleFrameSources.hoverIn[index], "high")))
+      .then(async (images) => {
         if (cancelled) return;
-        let offset = 0;
-        framesRef.current = Object.fromEntries(sequenceEntries.map(([kind, sources]) => {
-          const next = images.slice(offset, offset + sources.length);
-          offset += sources.length;
-          return [kind, next];
-        }));
-        framesReadyRef.current = true;
-        if (canvasRef.current) canvasRef.current.dataset.ready = "true";
-        if (hoveredRef.current) activate();
-      })
-      .catch(() => {
-        if (canvasRef.current) canvasRef.current.dataset.ready = "false";
+        assignFrames(eagerEntries, images);
+        if (images.some(Boolean)) {
+          framesReadyRef.current = true;
+          if (canvasRef.current) canvasRef.current.dataset.ready = "true";
+          if (hoveredRef.current) activate();
+        }
+
+        const backgroundEntries = sequenceEntries.flatMap(([kind, sources]) => (
+          sources.map((_, index) => [kind, index])
+        )).filter(([kind, index]) => !(kind === "hoverIn" && index < HOVER_IN_EAGER_FRAME_COUNT));
+
+        for (let offset = 0; offset < backgroundEntries.length && !cancelled; offset += FRAME_LOAD_BATCH_SIZE) {
+          const batch = backgroundEntries.slice(offset, offset + FRAME_LOAD_BATCH_SIZE);
+          const batchImages = await Promise.all(batch.map(([kind, index]) => (
+            loadFrame(doodleFrameSources[kind][index])
+          )));
+          assignFrames(batch, batchImages);
+        }
       });
 
     return () => {
