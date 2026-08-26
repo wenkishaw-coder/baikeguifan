@@ -13,6 +13,7 @@
   const otherCopyFiles = ["1.png", "2.png", "3.png", "4.png", "6.png", "7.png", "8.png", "9.png"];
   const copyQueues = new Map();
   const copyLastFiles = new Map();
+  const copyImageCache = new Map();
   const planeDisplayScale = 1;
   const yellowDisplayScale = 1;
   const maxActivePlanes = 6;
@@ -40,6 +41,17 @@
     image.src = assetUrl(`planes/${folder}/plane.png`);
     return [folder, image];
   }));
+  // Blessing text is selected only after a click, but the files are small and
+  // stable. Decode every option in the background so the click path never has
+  // to wait for a newly-created image element.
+  [...blueCopyFiles.map((file) => ["copy-blue-random", file]), ...otherCopyFiles.map((file) => ["copy-random", file])]
+    .forEach(([folder, file]) => {
+      const image = new Image();
+      image.decoding = "async";
+      if ("fetchPriority" in image) image.fetchPriority = "low";
+      image.src = assetUrl(`${folder}/${file}`);
+      copyImageCache.set(`${folder}/${file}`, image);
+    });
   const guideButtonImage = new Image();
   guideButtonImage.decoding = "async";
   guideButtonImage.src = guideButtonUrl;
@@ -68,6 +80,21 @@
   guide.append(guideLight, guideButton);
   flightsStage.appendChild(guide);
   document.body.appendChild(flightsStage);
+
+  // Start each paper video's network request before the entry wave begins.
+  // These muted, offscreen warmers do not render or play in the page; they only
+  // let the browser fetch and decode the first frame before a user click.
+  const effectVideoWarmers = planeFolders.map((folder) => {
+    const video = document.createElement("video");
+    video.className = "teacher-day-plane-source";
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = "auto";
+    video.src = assetUrl(`planes/${folder}/effect.mp4`);
+    video.load();
+    flightsStage.appendChild(video);
+    return video;
+  });
 
   let disposed = false;
   let phase = "entry";
@@ -511,7 +538,9 @@
     copy.alt = "教师节祝福";
     const copyFolder = flight.folder === "blue" ? "copy-blue-random" : "copy-random";
     const copyFiles = flight.folder === "blue" ? blueCopyFiles : otherCopyFiles;
-    copy.src = assetUrl(randomCopy(copyFolder, copyFiles));
+    const copyPath = randomCopy(copyFolder, copyFiles);
+    const cachedCopy = copyImageCache.get(copyPath);
+    copy.src = cachedCopy?.src || assetUrl(copyPath);
     const video = flight.video;
 
     flight.effect = effect;
