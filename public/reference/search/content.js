@@ -4,7 +4,7 @@
   const keyword = new URLSearchParams(location.search).get("wd") || "";
   if (location.protocol !== "file:" && !keyword.includes("教师节")) return;
 
-  const VERSION = "planes-826-75";
+  const VERSION = "planes-826-76";
   const assetUrl = (path) => new URL(`plane-assets/${path}?v=${VERSION}`, document.baseURI || location.href).href;
   const guideLightUrl = new URL(`guide-light.png?v=${VERSION}`, document.baseURI || location.href).href;
   const planeFolders = ["blue", "green", "pink", "orange", "yellow"];
@@ -1023,11 +1023,14 @@
         // separate lane and a counter-bending route so it never tracks the
         // original pink plane's entry path.
         folder: "pink",
-        end: { x: width * .285, y: height * .535 },
-        rotate: -42,
+        end: { x: width * .715, y: height * .505 },
+        // The artwork's nose is 22deg above its local x-axis, so this
+        // rotation keeps the added pink plane moving gently toward the right
+        // middle instead of climbing almost vertically.
+        rotate: 14,
         distance: Math.max(width, height) * 1.26,
-        offset: 152,
-        curve: { firstBend: -.1, secondBend: .07 },
+        offset: -108,
+        curve: { firstBend: .075, secondBend: -.035 },
         delay: 180,
       },
     ];
