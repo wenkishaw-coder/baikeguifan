@@ -4,7 +4,7 @@
   const keyword = new URLSearchParams(location.search).get("wd") || "";
   if (location.protocol !== "file:" && !keyword.includes("教师节")) return;
 
-  const VERSION = "planes-826-85";
+  const VERSION = "planes-826-86";
   const assetUrl = (path) => new URL(`plane-assets/${path}?v=${VERSION}`, document.baseURI || location.href).href;
   const planeFolders = ["blue", "green", "pink", "orange", "yellow"];
   const blueCopyFiles = ["10.png", "5.png"];
@@ -1024,6 +1024,19 @@
         distance: Math.max(width, height) * .78,
         offset: Math.max(width, height) * .93,
         curve: { firstBend: .075, secondBend: -.035 },
+        delay: 180,
+      },
+      {
+        // Additional blue flight following the supplied lower-left to
+        // upper-right reference path. Keep the end heading aligned with the
+        // path while using a shallow curve so it does not read as a rigid
+        // diagonal translation.
+        folder: "blue",
+        end: { x: width * .62, y: height * .08 },
+        rotate: -37,
+        distance: Math.max(width, height) * 1.18,
+        offset: -200,
+        curve: { firstBend: .05, secondBend: -.015 },
         delay: 180,
       },
     ];
