@@ -4,7 +4,7 @@
   const keyword = new URLSearchParams(location.search).get("wd") || "";
   if (location.protocol !== "file:" && !keyword.includes("教师节")) return;
 
-  const VERSION = "planes-826-76";
+  const VERSION = "planes-826-77";
   const assetUrl = (path) => new URL(`plane-assets/${path}?v=${VERSION}`, document.baseURI || location.href).href;
   const guideLightUrl = new URL(`guide-light.png?v=${VERSION}`, document.baseURI || location.href).href;
   const planeFolders = ["blue", "green", "pink", "orange", "yellow"];
@@ -1028,8 +1028,12 @@
         // rotation keeps the added pink plane moving gently toward the right
         // middle instead of climbing almost vertically.
         rotate: 14,
-        distance: Math.max(width, height) * 1.26,
-        offset: -108,
+        // Start from the lower-left outside lane. The shorter forward span
+        // plus the lower offset keeps this route's total length in the same
+        // range as the other entry flights, while delaying its first viewport
+        // crossing so it does not lead the wave.
+        distance: Math.max(width, height) * .78,
+        offset: Math.max(width, height) * .93,
         curve: { firstBend: .075, secondBend: -.035 },
         delay: 180,
       },
