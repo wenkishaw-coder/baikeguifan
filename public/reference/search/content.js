@@ -4,7 +4,7 @@
   const keyword = new URLSearchParams(location.search).get("wd") || "";
   if (location.protocol !== "file:" && !keyword.includes("教师节")) return;
 
-  const VERSION = "planes-826-88";
+  const VERSION = "planes-826-89";
   const assetUrl = (path) => new URL(`plane-assets/${path}?v=${VERSION}`, document.baseURI || location.href).href;
   const planeFolders = ["blue", "green", "pink", "orange", "yellow"];
   const blueCopyFiles = ["10.png", "5.png"];
@@ -760,6 +760,9 @@
 
   const startFreeFlights = () => {
     flights.filter((flight) => !flight.isYellow).forEach((flight, index) => {
+      const releaseDelay = Number.isFinite(flight.postClickDelay)
+        ? flight.postClickDelay
+        : 80 + index * 125;
       flight.entryTimer = setTimeout(() => {
         if (disposed || phase !== "active" || flight.state !== "waiting") return;
         flight.state = "flying";
@@ -770,7 +773,7 @@
         flight.respawn = true;
         flight.motionDuration = durationForFlightRoute(flight.motionRoute);
         animateDeparture(flight);
-      }, 80 + index * 125);
+      }, releaseDelay);
     });
   };
 
@@ -923,6 +926,7 @@
       scale: spec.isYellow ? yellowDisplayScale : planeDisplayScale,
       entryDuration: spec.entryDuration,
       entryDelay: spec.entryDelay,
+      postClickDelay: spec.postClickDelay,
       state: "entering",
       hasEntered: false,
       raf: 0,
@@ -1046,6 +1050,9 @@
           secondBend: 0,
         },
         delay: 180,
+        // Release this added flight with the first ordinary plane after the
+        // yellow click instead of waiting for its list index slot.
+        postClickDelay: 80,
       },
     ];
     return entryConfigs.map((config) => ({
@@ -1066,6 +1073,7 @@
       flipY: Boolean(config.flipY),
       entryDuration: Math.max(900, arrivalAt - config.delay),
       entryDelay: config.delay,
+      postClickDelay: config.postClickDelay,
     }));
   };
 
