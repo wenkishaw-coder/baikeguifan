@@ -4,7 +4,7 @@
   const keyword = new URLSearchParams(location.search).get("wd") || "";
   if (location.protocol !== "file:" && !keyword.includes("教师节")) return;
 
-  const VERSION = "planes-826-74";
+  const VERSION = "planes-826-75";
   const assetUrl = (path) => new URL(`plane-assets/${path}?v=${VERSION}`, document.baseURI || location.href).href;
   const guideLightUrl = new URL(`guide-light.png?v=${VERSION}`, document.baseURI || location.href).href;
   const planeFolders = ["blue", "green", "pink", "orange", "yellow"];
@@ -793,7 +793,6 @@
       green: { rotate: 35, flipY: false },
       orange: { rotate: -163, flipY: true },
       yellow: { rotate: 0, flipY: false },
-      "sky-blue": { rotate: 146, flipY: true },
     };
     const profile = profiles[folder] || profiles.pink;
     const route = folder === "pink"
