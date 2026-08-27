@@ -4,7 +4,7 @@
   const keyword = new URLSearchParams(location.search).get("wd") || "";
   if (location.protocol !== "file:" && !keyword.includes("教师节")) return;
 
-  const VERSION = "planes-826-90";
+  const VERSION = "planes-826-91";
   const assetUrl = (path) => new URL(`plane-assets/${path}?v=${VERSION}`, document.baseURI || location.href).href;
   const guideButtonUrl = new URL(`guide-button-text.png?v=${VERSION}`, document.baseURI || location.href).href;
   const planeFolders = ["blue", "green", "pink", "orange", "yellow"];
