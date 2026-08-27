@@ -4,7 +4,7 @@
   const keyword = new URLSearchParams(location.search).get("wd") || "";
   if (location.protocol !== "file:" && !keyword.includes("教师节")) return;
 
-  const VERSION = "planes-826-87";
+  const VERSION = "planes-826-88";
   const assetUrl = (path) => new URL(`plane-assets/${path}?v=${VERSION}`, document.baseURI || location.href).href;
   const planeFolders = ["blue", "green", "pink", "orange", "yellow"];
   const blueCopyFiles = ["10.png", "5.png"];
@@ -1029,23 +1029,21 @@
         delay: 180,
       },
       {
-        // Additional blue flight following the supplied lower-left to
-        // upper-right reference path. Keep the end heading aligned with the
-        // path while using a shallow curve so it does not read as a rigid
-        // diagonal translation.
+        // Additional blue flight entering from the lower-left and settling in
+        // the lower-left lane. Keep the end heading aligned with the path
+        // while using a shallow curve so it does not read as a rigid slide.
         folder: "blue",
-        end: { x: width * .62, y: height * .08 },
+        end: { x: width * .28, y: height * .78 },
         rotate: -37,
-        distance: Math.max(width, height) * 1.18,
-        offset: -200,
-        // Keep the first part of the route below the viewport so this plane
-        // does not lead the entry wave. The handles then ease it onto the
-        // reference diagonal before the final upper-right approach.
+        distance: Math.max(width, height) * 1.04,
+        offset: -180,
+        // Keep the plane below the viewport for the early part of the entry,
+        // then let it follow a shallow right-up arc into its lower-left stop.
         curve: {
-          firstForward: .064,
-          firstBend: .043,
-          secondForward: .522,
-          secondBend: .009,
+          firstForward: .34,
+          firstBend: .05,
+          secondForward: .10,
+          secondBend: 0,
         },
         delay: 180,
       },
