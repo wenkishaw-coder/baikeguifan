@@ -294,11 +294,11 @@
   left: 50%;
   top: 50%;
   display: block;
-  width: 46%;
+  width: 48%;
   aspect-ratio: 1;
-  border: 2px solid rgba(255, 240, 168, .78);
+  border: 4px solid rgba(255, 240, 168, .9);
   border-radius: 50%;
-  box-shadow: 0 0 9px rgba(255, 240, 168, .28);
+  box-shadow: 0 0 11px rgba(255, 240, 168, .4);
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, -50%) scale(.65);
@@ -307,9 +307,10 @@
 }
 
 .teacher-day-plane-guide::after {
-  width: 62%;
-  border-color: rgba(255, 240, 168, .62);
-  box-shadow: 0 0 12px rgba(255, 240, 168, .22);
+  width: 68%;
+  border-width: 3px;
+  border-color: rgba(255, 240, 168, .78);
+  box-shadow: 0 0 14px rgba(255, 240, 168, .32);
 }
 
 .teacher-day-plane-guide.is-visible {
