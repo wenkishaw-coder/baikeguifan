@@ -4,9 +4,8 @@
   const keyword = new URLSearchParams(location.search).get("wd") || "";
   if (location.protocol !== "file:" && !keyword.includes("教师节")) return;
 
-  const VERSION = "planes-826-73";
+  const VERSION = "planes-826-74";
   const assetUrl = (path) => new URL(`plane-assets/${path}?v=${VERSION}`, document.baseURI || location.href).href;
-  const guideButtonUrl = new URL(`guide-button.png?v=${VERSION}`, document.baseURI || location.href).href;
   const guideLightUrl = new URL(`guide-light.png?v=${VERSION}`, document.baseURI || location.href).href;
   const planeFolders = ["blue", "green", "pink", "orange", "yellow"];
   const blueCopyFiles = ["10.png", "5.png"];
@@ -52,9 +51,6 @@
       image.src = assetUrl(`${folder}/${file}`);
       copyImageCache.set(`${folder}/${file}`, image);
     });
-  const guideButtonImage = new Image();
-  guideButtonImage.decoding = "async";
-  guideButtonImage.src = guideButtonUrl;
   const guideLightImage = new Image();
   guideLightImage.decoding = "async";
   guideLightImage.src = guideLightUrl;
@@ -72,12 +68,7 @@
   guideLight.alt = "";
   guideLight.decoding = "async";
   guideLight.src = guideLightUrl;
-  const guideButton = document.createElement("img");
-  guideButton.className = "teacher-day-plane-guide-button";
-  guideButton.alt = "点击纸飞机有惊喜";
-  guideButton.decoding = "async";
-  guideButton.src = guideButtonUrl;
-  guide.append(guideLight, guideButton);
+  guide.append(guideLight);
   flightsStage.appendChild(guide);
   document.body.appendChild(flightsStage);
 
@@ -1019,7 +1010,7 @@
         delay: 240,
       },
       {
-        folder: "sky-blue",
+        folder: "green",
         end: { x: width * .705, y: height * .185 },
         rotate: 146,
         flipY: true,
@@ -1089,7 +1080,7 @@
 
   const startWhenReady = () => {
     if (disposed || !document.body.classList.contains("search-page-ready")) return;
-    Promise.all([...planeImageCache.values(), guideButtonImage, guideLightImage].map(waitForImage)).then(() => {
+    Promise.all([...planeImageCache.values(), guideLightImage].map(waitForImage)).then(() => {
       if (!disposed && phase === "entry") startEntry();
     });
   };
