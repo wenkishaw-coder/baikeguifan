@@ -4,8 +4,9 @@
   const keyword = new URLSearchParams(location.search).get("wd") || "";
   if (location.protocol !== "file:" && !keyword.includes("教师节")) return;
 
-  const VERSION = "planes-826-89";
+  const VERSION = "planes-826-90";
   const assetUrl = (path) => new URL(`plane-assets/${path}?v=${VERSION}`, document.baseURI || location.href).href;
+  const guideButtonUrl = new URL(`guide-button-text.png?v=${VERSION}`, document.baseURI || location.href).href;
   const planeFolders = ["blue", "green", "pink", "orange", "yellow"];
   const blueCopyFiles = ["10.png", "5.png"];
   const otherCopyFiles = ["1.png", "2.png", "3.png", "4.png", "6.png", "7.png", "8.png", "9.png"];
@@ -50,6 +51,9 @@
       image.src = assetUrl(`${folder}/${file}`);
       copyImageCache.set(`${folder}/${file}`, image);
     });
+  const guideButtonImage = new Image();
+  guideButtonImage.decoding = "async";
+  guideButtonImage.src = guideButtonUrl;
   const flightsStage = document.createElement("div");
   flightsStage.id = "teacher-day-plane-flights";
   flightsStage.setAttribute("aria-live", "polite");
@@ -58,6 +62,12 @@
   guide.className = "teacher-day-plane-guide";
   guide.alt = "点击纸飞机有惊喜";
   guide.setAttribute("aria-hidden", "true");
+  const guideButton = document.createElement("img");
+  guideButton.className = "teacher-day-plane-guide-button";
+  guideButton.alt = "点击纸飞机有惊喜";
+  guideButton.decoding = "async";
+  guideButton.src = guideButtonUrl;
+  guide.appendChild(guideButton);
   flightsStage.appendChild(guide);
   document.body.appendChild(flightsStage);
 
@@ -1104,7 +1114,7 @@
 
   const startWhenReady = () => {
     if (disposed || !document.body.classList.contains("search-page-ready")) return;
-    Promise.all([...planeImageCache.values()].map(waitForImage)).then(() => {
+    Promise.all([...planeImageCache.values(), guideButtonImage].map(waitForImage)).then(() => {
       if (!disposed && phase === "entry") startEntry();
     });
   };

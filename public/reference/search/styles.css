@@ -337,6 +337,19 @@
   opacity: 0;
 }
 
+.teacher-day-plane-guide-button {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: auto;
+  transform: translateX(-50%);
+  pointer-events: none;
+  user-select: none;
+}
+
 .teacher-day-plane-flight {
   width: clamp(100px, 9.3vw, 178px);
   height: auto;
