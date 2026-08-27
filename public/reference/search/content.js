@@ -4,7 +4,7 @@
   const keyword = new URLSearchParams(location.search).get("wd") || "";
   if (location.protocol !== "file:" && !keyword.includes("教师节")) return;
 
-  const VERSION = "planes-826-71";
+  const VERSION = "planes-826-73";
   const assetUrl = (path) => new URL(`plane-assets/${path}?v=${VERSION}`, document.baseURI || location.href).href;
   const guideButtonUrl = new URL(`guide-button.png?v=${VERSION}`, document.baseURI || location.href).href;
   const guideLightUrl = new URL(`guide-light.png?v=${VERSION}`, document.baseURI || location.href).href;
@@ -250,19 +250,27 @@
     return `${folder}/${file}`;
   };
 
-  const makeEntryRoute = (end, rotate, flipY, distance, offset) => {
+  const makeEntryRoute = (end, rotate, flipY, distance, offset, curve = {}) => {
     const direction = unitVector(headingFromRotation(rotate, flipY, false));
     const normal = normalVector(direction);
     const start = {
       x: end.x - direction.x * distance + normal.x * offset,
       y: end.y - direction.y * distance + normal.y * offset,
     };
+    const firstBend = Number.isFinite(curve.firstBend) ? curve.firstBend : 0;
+    const secondBend = Number.isFinite(curve.secondBend) ? curve.secondBend : 0;
     return {
       p0: start,
       // Both endpoint handles follow the nose direction. The offset start
       // gives the cubic a shallow arc without making the plane turn sharply.
-      p1: { x: start.x + direction.x * distance * .34, y: start.y + direction.y * distance * .34 },
-      p2: { x: end.x - direction.x * distance * .28, y: end.y - direction.y * distance * .28 },
+      p1: {
+        x: start.x + direction.x * distance * .34 + normal.x * distance * firstBend,
+        y: start.y + direction.y * distance * .34 + normal.y * distance * firstBend,
+      },
+      p2: {
+        x: end.x - direction.x * distance * .28 + normal.x * distance * secondBend,
+        y: end.y - direction.y * distance * .28 + normal.y * distance * secondBend,
+      },
       p3: end,
     };
   };
@@ -794,6 +802,7 @@
       green: { rotate: 35, flipY: false },
       orange: { rotate: -163, flipY: true },
       yellow: { rotate: 0, flipY: false },
+      "sky-blue": { rotate: 146, flipY: true },
     };
     const profile = profiles[folder] || profiles.pink;
     const route = folder === "pink"
@@ -1009,13 +1018,42 @@
         // plane's final stop.
         delay: 240,
       },
+      {
+        folder: "sky-blue",
+        end: { x: width * .705, y: height * .185 },
+        rotate: 146,
+        flipY: true,
+        distance: Math.max(width, height) * 1.34,
+        offset: -156,
+        curve: { firstBend: .12, secondBend: -.04 },
+        delay: 120,
+      },
+      {
+        // Reuse the pink artwork for the additional flight, but give it a
+        // separate lane and a counter-bending route so it never tracks the
+        // original pink plane's entry path.
+        folder: "pink",
+        end: { x: width * .285, y: height * .535 },
+        rotate: -42,
+        distance: Math.max(width, height) * 1.26,
+        offset: 152,
+        curve: { firstBend: -.1, secondBend: .07 },
+        delay: 180,
+      },
     ];
     return entryConfigs.map((config) => ({
       folder: config.folder,
       isYellow: config.folder === "yellow",
       isFirstWave: true,
       revealAfterSafeEntry: false,
-      route: makeEntryRoute(config.end, config.rotate, Boolean(config.flipY), config.distance, config.offset),
+      route: makeEntryRoute(
+        config.end,
+        config.rotate,
+        Boolean(config.flipY),
+        config.distance,
+        config.offset,
+        config.curve,
+      ),
       startRotate: 0,
       endRotate: config.rotate,
       flipY: Boolean(config.flipY),
