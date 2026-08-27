@@ -287,58 +287,50 @@
   overflow: visible;
 }
 
-.teacher-day-plane-guide::before {
+.teacher-day-plane-guide::before,
+.teacher-day-plane-guide::after {
   content: "";
   position: absolute;
   left: 50%;
   top: 50%;
   display: block;
-  width: 64%;
+  width: 38%;
   aspect-ratio: 1;
   box-sizing: border-box;
+  border: 6px solid rgba(255, 240, 168, .96);
   border-radius: 50%;
-  background: radial-gradient(
-    circle at center,
-    rgba(255, 240, 168, .46) 0%,
-    rgba(255, 240, 168, .32) 24%,
-    rgba(255, 240, 168, .2) 48%,
-    rgba(255, 240, 168, .09) 72%,
-    rgba(255, 240, 168, 0) 100%
-  );
-  box-shadow: 0 0 18px rgba(255, 240, 168, .16);
+  box-shadow: 0 0 14px rgba(255, 240, 168, .5);
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, -50%) scale(.72);
+  transform: translate(-50%, -50%);
   transform-origin: center center;
-  will-change: transform, opacity;
+  will-change: width, opacity;
+}
+
+.teacher-day-plane-guide::after {
+  width: 58%;
+  border-width: 3px;
+  border-color: rgba(255, 240, 168, .88);
+  box-shadow: 0 0 18px rgba(255, 240, 168, .4);
 }
 
 .teacher-day-plane-guide.is-visible {
   opacity: 1;
 }
 
+.teacher-day-plane-guide.is-visible::before,
+.teacher-day-plane-guide.is-visible::after {
+  animation-duration: 1.8s;
+  animation-timing-function: ease-out;
+  animation-iteration-count: infinite;
+}
+
 .teacher-day-plane-guide.is-visible::before {
-  animation: teacher-day-plane-guide-wave 2.1s ease-out infinite;
+  animation-name: teacher-day-plane-guide-ring-pulse-inner;
 }
 
-@keyframes teacher-day-plane-guide-wave {
-  0% {
-    opacity: .78;
-    transform: translate(-50%, -50%) scale(.72);
-  }
-  58% {
-    opacity: .36;
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(1.28);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .teacher-day-plane-guide::before {
-    animation: none;
-  }
+.teacher-day-plane-guide.is-visible::after {
+  animation-name: teacher-day-plane-guide-ring-pulse-outer;
 }
 
 .teacher-day-plane-guide.is-hidden {
@@ -370,5 +362,40 @@
   .teacher-day-plane-flight.is-yellow,
   .teacher-day-plane-flight-hit.is-yellow {
     width: clamp(100px, 9.3vw, 178px);
+  }
+}
+
+@keyframes teacher-day-plane-guide-ring-pulse-inner {
+  0% {
+    width: 38%;
+    opacity: .96;
+  }
+  72% {
+    opacity: .1;
+  }
+  100% {
+    width: 52%;
+    opacity: 0;
+  }
+}
+
+@keyframes teacher-day-plane-guide-ring-pulse-outer {
+  0% {
+    width: 58%;
+    opacity: .5;
+  }
+  72% {
+    opacity: .24;
+  }
+  100% {
+    width: 72%;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teacher-day-plane-guide::before,
+  .teacher-day-plane-guide::after {
+    animation: none;
   }
 }
