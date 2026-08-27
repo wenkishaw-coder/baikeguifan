@@ -4,7 +4,7 @@
   const keyword = new URLSearchParams(location.search).get("wd") || "";
   if (location.protocol !== "file:" && !keyword.includes("教师节")) return;
 
-  const VERSION = "planes-826-86";
+  const VERSION = "planes-826-87";
   const assetUrl = (path) => new URL(`plane-assets/${path}?v=${VERSION}`, document.baseURI || location.href).href;
   const planeFolders = ["blue", "green", "pink", "orange", "yellow"];
   const blueCopyFiles = ["10.png", "5.png"];
@@ -239,17 +239,19 @@
     };
     const firstBend = Number.isFinite(curve.firstBend) ? curve.firstBend : 0;
     const secondBend = Number.isFinite(curve.secondBend) ? curve.secondBend : 0;
+    const firstForward = Number.isFinite(curve.firstForward) ? curve.firstForward : .34;
+    const secondForward = Number.isFinite(curve.secondForward) ? curve.secondForward : .28;
     return {
       p0: start,
       // Both endpoint handles follow the nose direction. The offset start
       // gives the cubic a shallow arc without making the plane turn sharply.
       p1: {
-        x: start.x + direction.x * distance * .34 + normal.x * distance * firstBend,
-        y: start.y + direction.y * distance * .34 + normal.y * distance * firstBend,
+        x: start.x + direction.x * distance * firstForward + normal.x * distance * firstBend,
+        y: start.y + direction.y * distance * firstForward + normal.y * distance * firstBend,
       },
       p2: {
-        x: end.x - direction.x * distance * .28 + normal.x * distance * secondBend,
-        y: end.y - direction.y * distance * .28 + normal.y * distance * secondBend,
+        x: end.x - direction.x * distance * secondForward + normal.x * distance * secondBend,
+        y: end.y - direction.y * distance * secondForward + normal.y * distance * secondBend,
       },
       p3: end,
     };
@@ -1036,7 +1038,15 @@
         rotate: -37,
         distance: Math.max(width, height) * 1.18,
         offset: -200,
-        curve: { firstBend: .05, secondBend: -.015 },
+        // Keep the first part of the route below the viewport so this plane
+        // does not lead the entry wave. The handles then ease it onto the
+        // reference diagonal before the final upper-right approach.
+        curve: {
+          firstForward: .064,
+          firstBend: .043,
+          secondForward: .522,
+          secondBend: .009,
+        },
         delay: 180,
       },
     ];
