@@ -331,7 +331,6 @@
 
 .teacher-day-plane-guide.is-visible::after {
   animation-name: teacher-day-plane-guide-ring-pulse-outer;
-  animation-delay: .82s;
 }
 
 .teacher-day-plane-guide.is-hidden {
@@ -372,7 +371,7 @@
     opacity: .96;
   }
   72% {
-    opacity: .18;
+    opacity: .1;
   }
   100% {
     width: 52%;
@@ -383,10 +382,10 @@
 @keyframes teacher-day-plane-guide-ring-pulse-outer {
   0% {
     width: 58%;
-    opacity: .72;
+    opacity: .5;
   }
   72% {
-    opacity: .14;
+    opacity: .24;
   }
   100% {
     width: 72%;
