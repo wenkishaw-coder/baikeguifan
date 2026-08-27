@@ -382,10 +382,10 @@
 @keyframes teacher-day-plane-guide-ring-pulse-outer {
   0% {
     width: 58%;
-    opacity: .5;
+    opacity: .66;
   }
   72% {
-    opacity: .24;
+    opacity: .12;
   }
   100% {
     width: 72%;
